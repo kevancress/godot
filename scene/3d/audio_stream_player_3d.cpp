@@ -78,7 +78,9 @@ public:
 		const Speaker *r = speakers.ptr();
 		real_t sum_squared_gains = 0.0;
 		for (unsigned int speaker_num = 0; speaker_num < (unsigned int)speakers.size(); speaker_num++) {
-			real_t initial_gain = 0.5 * powf(1.0 + r[speaker_num].direction.dot(source_direction), tightness) / r[speaker_num].effective_number_of_speakers;
+			//tightness *= r[speaker_num].direction.length();
+			//print_line(r[speaker_num].direction.normalized());
+			real_t initial_gain = 0.5 * powf(1.0 + r[speaker_num].direction.normalized().dot(source_direction), tightness) / r[speaker_num].effective_number_of_speakers;
 			r[speaker_num].squared_gain = initial_gain * initial_gain;
 			sum_squared_gains += r[speaker_num].squared_gain;
 		}
@@ -90,15 +92,7 @@ public:
 };
 
 //TODO: hardcoded main speaker directions for 2, 3.1, 5.1 and 7.1 setups - these are simplified and could also be made configurable
-static const Vector3 speaker_directions[7] = {
-	Vector3(-1.0, 0.0, -1.0).normalized(), // front-left
-	Vector3(1.0, 0.0, -1.0).normalized(), // front-right
-	Vector3(0.0, 0.0, -1.0).normalized(), // center
-	Vector3(-1.0, 0.0, 1.0).normalized(), // rear-left
-	Vector3(1.0, 0.0, 1.0).normalized(), // rear-right
-	Vector3(-1.0, 0.0, 0.0).normalized(), // side-left
-	Vector3(1.0, 0.0, 0.0).normalized(), // side-right
-};
+
 
 void AudioStreamPlayer3D::_calc_output_vol(const Vector3 &source_dir, real_t tightness, Vector<AudioFrame> &output) {
 	unsigned int speaker_count = 0; // only main speakers (no LFE)
@@ -113,12 +107,23 @@ void AudioStreamPlayer3D::_calc_output_vol(const Vector3 &source_dir, real_t tig
 			speaker_count = 5;
 			break;
 		case AudioServer::SPEAKER_SURROUND_71:
-			speaker_count = 7;
+			speaker_count = 8;
 			break;
 	}
 
+	Vector3 speaker_directions[8] = {
+		GLOBAL_GET("audio/general/speaker_1_position"), // front-left
+		GLOBAL_GET("audio/general/speaker_2_position"), // front-right
+		GLOBAL_GET("audio/general/speaker_3_position"), // center
+		GLOBAL_GET("audio/general/speaker_4_position"), // rear-left
+		GLOBAL_GET("audio/general/speaker_5_position"), // rear-right
+		GLOBAL_GET("audio/general/speaker_6_position"), // side-left
+		GLOBAL_GET("audio/general/speaker_7_position"), // side-right
+		GLOBAL_GET("audio/general/speaker_8_position"), //LFE
+	};
+
 	Spcap spcap(speaker_count, speaker_directions); //TODO: should only be created/recreated once the speaker mode / speaker positions changes
-	real_t volumes[7];
+	real_t volumes[8];
 	spcap.calculate(source_dir, tightness, speaker_count, volumes);
 
 	switch (AudioServer::get_singleton()->get_speaker_mode()) {
@@ -131,7 +136,7 @@ void AudioStreamPlayer3D::_calc_output_vol(const Vector3 &source_dir, real_t tig
 			output.write[2].right = volumes[4]; // rear-right
 			[[fallthrough]];
 		case AudioServer::SPEAKER_SURROUND_31:
-			output.write[1].right = 1.0; // LFE - always full power
+			output.write[1].right = volumes[7]; // LFE - always full power
 			output.write[1].left = volumes[2]; // center
 			[[fallthrough]];
 		case AudioServer::SPEAKER_MODE_STEREO:
