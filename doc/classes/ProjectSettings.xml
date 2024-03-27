@@ -482,6 +482,29 @@
 			Specifies the default playback type of the Web platform.
 			The default value is set to [b]Sample[/b] as the Web platform is not suited to mix audio streams outside of the Web Audio API, especially when exporting a single-threaded game. [b]Sample[/b] allows for lower latency on the web platform at the cost of flexibility ([AudioEffect]s are not supported).
 			[b]Warning:[/b] Forcing [b]Stream[/b] on the Web platform may cause high audio latency and crackling, especially when exporting a multi-threaded game.
+		<member name="audio/general/speaker_1_position" type="Vector3" setter="" getter="" default="Vector3(-1.0, 0.0, -1.0)">
+			Position of speaker 1 used for spatial sound. Typically Front Left.
+		</member>
+		<member name="audio/general/speaker_2_position" type="Vector3" setter="" getter="" default="Vector3(1.0, 0.0, -1.0)">
+			Position of speaker 2 used for spatial sound. Typically Front Right.
+		</member>
+		<member name="audio/general/speaker_3_position" type="Vector3" setter="" getter="" default="Vector3(0.0, 0.0, -1.0)">
+			Position of speaker 3 used for spatial sound. Typically Front Center.
+		</member>
+		<member name="audio/general/speaker_4_position" type="Vector3" setter="" getter="" default="Vector3(-1.0, 0.0, 1.0)">
+			Position of speaker 4 used for spatial sound. Typically Rear Left.
+		</member>
+		<member name="audio/general/speaker_5_position" type="Vector3" setter="" getter="" default="Vector3(1.0, 0.0, 1.0)">
+			Position of speaker 5 used for spatial sound. Typically Rear Right.
+		</member>
+		<member name="audio/general/speaker_6_position" type="Vector3" setter="" getter="" default="Vector3(-1.0, 0.0, 0.0)">
+			Position of speaker 6 used for spatial sound. Typically Side Left.
+		</member>
+		<member name="audio/general/speaker_7_position" type="Vector3" setter="" getter="" default="Vector3(1.0, 0.0, 0.0)">
+			Position of speaker 7 used for spatial sound. Typically Side Right.
+		</member>
+		<member name="audio/general/speaker_8_position" type="Vector3" setter="" getter="" default="Vector3(0.0, 0.0, 0.0)">
+			Position of speaker 8 used for spatial sound. Typically LFE.
 		</member>
 		<member name="audio/general/ios/mix_with_others" type="bool" setter="" getter="" default="false">
 			Sets the [url=https://developer.apple.com/documentation/avfaudio/avaudiosession/categoryoptions/1616611-mixwithothers]mixWithOthers[/url] option for the AVAudioSession on iOS. This will override the mix behavior, if the category is set to [code]Play and Record[/code], [code]Playback[/code], or [code]Multi Route[/code].
