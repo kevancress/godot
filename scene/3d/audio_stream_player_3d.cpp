@@ -385,61 +385,115 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 			listener_node = listener;
 			listener_is_camera = false;
 		}
-
-		Vector3 local_pos = listener_node->get_global_transform().orthonormalized().affine_inverse().xform(global_pos);
-
-		float dist = local_pos.length();
-
-		Vector3 area_sound_pos;
-		Vector3 listener_area_pos;
-
-		Area3D *area = _get_overriding_area();
-
-		if (area && area->is_using_reverb_bus() && area->get_reverb_uniformity() > 0) {
-			area_sound_pos = space_state->get_closest_point_to_object_volume(area->get_rid(), listener_node->get_global_transform().origin);
-			listener_area_pos = listener_node->get_global_transform().affine_inverse().xform(area_sound_pos);
-		}
-
-		if (max_distance > 0) {
-			float total_max = max_distance;
-
-			if (area && area->is_using_reverb_bus() && area->get_reverb_uniformity() > 0) {
-				total_max = MAX(total_max, listener_area_pos.length());
-			}
-			if (total_max > max_distance) {
-				continue; //can't hear this sound in this listener
-			}
-		}
-
-		float multiplier = Math::db_to_linear(_get_attenuation_db(dist));
-		if (max_distance > 0) {
-			multiplier *= MAX(0, 1.0 - (dist / max_distance));
-		}
-
-		float db_att = (1.0 - MIN(1.0, multiplier)) * attenuation_filter_db;
-
-		if (emission_angle_enabled) {
-			Vector3 listenertopos = global_pos - listener_node->get_global_transform().origin;
-			float c = listenertopos.normalized().dot(get_global_transform().basis.get_column(2).normalized()); //it's z negative
-			float angle = Math::rad_to_deg(Math::acos(c));
-			if (angle > emission_angle) {
-				db_att -= -emission_angle_filter_attenuation_db;
-			}
-		}
-
-		linear_attenuation = Math::db_to_linear(db_att);
-		for (Ref<AudioStreamPlayback> &playback : internal->stream_playbacks) {
-			AudioServer::get_singleton()->set_playback_highshelf_params(playback, linear_attenuation, attenuation_filter_cutoff_hz);
-		}
-		// Bake in a constant factor here to allow the project setting defaults for 2d and 3d to be normalized to 1.0.
+			// Bake in a constant factor here to allow the project setting defaults for 2d and 3d to be normalized to 1.0.
 		float tightness = cached_global_panning_strength * 2.0f;
 		tightness *= panning_strength;
-		_calc_output_vol(local_pos.normalized(), tightness, output_volume_vector);
+		Vector3 listener_pos = listener_node->get_global_transform().orthonormalized().affine_inverse().xform(global_pos);
+		_calc_output_vol(listener_pos.normalized(), tightness, output_volume_vector);
 
-		for (unsigned int k = 0; k < 4; k++) {
-			output_volume_vector.write[k] = multiplier * output_volume_vector[k];
+		
+		unsigned int speaker_count = 0; // only main speakers (no LFE)
+		switch (AudioServer::get_singleton()->get_speaker_mode()) {
+			case AudioServer::SPEAKER_MODE_STEREO:
+				speaker_count = 2;
+				break;
+			case AudioServer::SPEAKER_SURROUND_31:
+				speaker_count = 3;
+				break;
+			case AudioServer::SPEAKER_SURROUND_51:
+				speaker_count = 5;
+				break;
+			case AudioServer::SPEAKER_SURROUND_71:
+				speaker_count = 8;
+				break;
 		}
 
+		Vector3 speaker_positions[8] = {
+			GLOBAL_GET("audio/general/speaker_1_position"), // front-left
+			GLOBAL_GET("audio/general/speaker_2_position"), // front-right
+			GLOBAL_GET("audio/general/speaker_3_position"), // center
+			GLOBAL_GET("audio/general/speaker_4_position"), // rear-left
+			GLOBAL_GET("audio/general/speaker_5_position"), // rear-right
+			GLOBAL_GET("audio/general/speaker_6_position"), // side-left
+			GLOBAL_GET("audio/general/speaker_7_position"), // side-right
+			GLOBAL_GET("audio/general/speaker_8_position"), //LFE
+		};
+
+		real_t multipliers[8];
+		Vector3 area_sound_pos;
+		Vector3 listener_area_pos;
+		Vector3 local_pos;
+
+		Area3D *area = _get_overriding_area();
+		int channel_count = AudioServer::get_singleton()->get_channel_count();
+
+		for (int i = 0; i < speaker_count; i++) {
+
+			local_pos = listener_node->get_global_transform().orthonormalized().affine_inverse().xform(global_pos) - speaker_positions[i];
+
+
+			float dist = local_pos.length();
+
+			if (area && area->is_using_reverb_bus() && area->get_reverb_uniformity() > 0) {
+				area_sound_pos = space_state->get_closest_point_to_object_volume(area->get_rid(), listener_node->get_global_transform().origin);
+				listener_area_pos = listener_node->get_global_transform().affine_inverse().xform(area_sound_pos) - speaker_positions[i];
+			}
+
+			if (max_distance > 0) {
+				float total_max = max_distance;
+
+				if (area && area->is_using_reverb_bus() && area->get_reverb_uniformity() > 0) {
+					total_max = MAX(total_max, listener_area_pos.length());
+				}
+				if (total_max > max_distance) {
+					continue; //can't hear this sound in this listener
+				}
+			}
+
+			float multiplier = Math::db_to_linear(_get_attenuation_db(dist));
+			if (max_distance > 0) {
+				multiplier *= MAX(0, 1.0 - (dist / max_distance));
+			}
+
+			float db_att = (1.0 - MIN(1.0, multiplier)) * attenuation_filter_db;
+
+			if (emission_angle_enabled) {
+				Vector3 listenertopos = global_pos - listener_node->get_global_transform().origin - speaker_positions[i];
+				float c = listenertopos.normalized().dot(get_global_transform().basis.get_column(2).normalized()); //it's z negative
+				float angle = Math::rad_to_deg(Math::acos(c));
+				if (angle > emission_angle) {
+					db_att -= -emission_angle_filter_attenuation_db;
+				}
+			}
+
+			linear_attenuation = Math::db_to_linear(db_att);
+			for (Ref<AudioStreamPlayback> &playback : internal->stream_playbacks) {
+				AudioServer::get_singleton()->set_playback_highshelf_params(playback, linear_attenuation, attenuation_filter_cutoff_hz);
+			}
+
+			multipliers[i] = multiplier;
+		}
+
+		switch (AudioServer::get_singleton()->get_speaker_mode()) {
+			case AudioServer::SPEAKER_SURROUND_71:
+				output_volume_vector.write[3].left *= multipliers[5]; // side-left
+				output_volume_vector.write[3].right *= multipliers[6]; // side-right
+				[[fallthrough]];
+			case AudioServer::SPEAKER_SURROUND_51:
+				output_volume_vector.write[2].left *= multipliers[3]; // rear-left
+				output_volume_vector.write[2].right *= multipliers[4]; // rear-right
+				[[fallthrough]];
+			case AudioServer::SPEAKER_SURROUND_31:
+				output_volume_vector.write[1].right *= multipliers[7]; // LFE - always full power
+				output_volume_vector.write[1].left *= multipliers[2]; // center
+				[[fallthrough]];
+			case AudioServer::SPEAKER_MODE_STEREO:
+				output_volume_vector.write[0].right *= multipliers[1]; // front-right
+				output_volume_vector.write[0].left *= multipliers[0]; // front-left
+				break;
+		}
+
+		listener_node->get_global_transform().orthonormalized().affine_inverse().xform(global_pos);
 		HashMap<StringName, Vector<AudioFrame>> bus_volumes;
 		if (area) {
 			if (area->is_overriding_audio_bus()) {
@@ -448,6 +502,8 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 			}
 
 			if (area->is_using_reverb_bus()) {
+				area_sound_pos = space_state->get_closest_point_to_object_volume(area->get_rid(), listener_node->get_global_transform().origin);
+				listener_area_pos = listener_node->get_global_transform().affine_inverse().xform(area_sound_pos);
 				StringName reverb_bus_name = area->get_reverb_bus_name();
 				Vector<AudioFrame> reverb_vol;
 				_calc_reverb_vol(area, listener_area_pos, output_volume_vector, reverb_vol);
