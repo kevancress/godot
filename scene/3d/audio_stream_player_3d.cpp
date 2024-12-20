@@ -141,8 +141,8 @@ void AudioStreamPlayer3D::_calc_output_vol(const Vector3 &source_dir, real_t tig
 			output.write[2].right = volumes[4]; // rear-right
 			[[fallthrough]];
 		case AudioServer::SPEAKER_SURROUND_31:
-			output.write[1].right = volumes[7]; // LFE - always full power
-			output.write[1].left = volumes[2]; // center
+			output.write[1].l = volumes[7]; // LFE - always full power
+			output.write[1].r = volumes[2]; // center
 			[[fallthrough]];
 		case AudioServer::SPEAKER_MODE_STEREO:
 			output.write[0].right = volumes[1]; // front-right
@@ -450,7 +450,7 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 		Area3D *area = _get_overriding_area();
 		int channel_count = AudioServer::get_singleton()->get_channel_count();
 
-		for (int i = 0; i < speaker_count; i++) {
+		for (unsigned int i = 0; i < speaker_count; i++) {
 
 			local_pos = listener_node->get_global_transform().orthonormalized().affine_inverse().xform(global_pos) - speaker_positions[i];
 
@@ -490,7 +490,7 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 			}
 
 			linear_attenuation = Math::db_to_linear(db_att);
-			for (Ref<AudioStreamPlayback> &playback : internal->stream_playbacks) {
+			for (Ref<AudioStreamPlayback> &playback : stream_playbacks) {
 				AudioServer::get_singleton()->set_playback_highshelf_params(playback, linear_attenuation, attenuation_filter_cutoff_hz);
 			}
 
@@ -499,20 +499,20 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 
 		switch (AudioServer::get_singleton()->get_speaker_mode()) {
 			case AudioServer::SPEAKER_SURROUND_71:
-				output_volume_vector.write[3].left *= multipliers[5]; // side-left
-				output_volume_vector.write[3].right *= multipliers[6]; // side-right
+				output_volume_vector.write[3].l *= multipliers[5]; // side-left
+				output_volume_vector.write[3].r *= multipliers[6]; // side-right
 				[[fallthrough]];
 			case AudioServer::SPEAKER_SURROUND_51:
-				output_volume_vector.write[2].left *= multipliers[3]; // rear-left
-				output_volume_vector.write[2].right *= multipliers[4]; // rear-right
+				output_volume_vector.write[2].l *= multipliers[3]; // rear-left
+				output_volume_vector.write[2].r *= multipliers[4]; // rear-right
 				[[fallthrough]];
 			case AudioServer::SPEAKER_SURROUND_31:
-				output_volume_vector.write[1].right *= multipliers[7]; // LFE - always full power
-				output_volume_vector.write[1].left *= multipliers[2]; // center
+				output_volume_vector.write[1].r *= multipliers[7]; // LFE - always full power
+				output_volume_vector.write[1].l *= multipliers[2]; // center
 				[[fallthrough]];
 			case AudioServer::SPEAKER_MODE_STEREO:
-				output_volume_vector.write[0].right *= multipliers[1]; // front-right
-				output_volume_vector.write[0].left *= multipliers[0]; // front-left
+				output_volume_vector.write[0].r *= multipliers[1]; // front-right
+				output_volume_vector.write[0].l *= multipliers[0]; // front-left
 				break;
 		}
 
