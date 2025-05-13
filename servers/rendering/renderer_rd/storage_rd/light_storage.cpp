@@ -1015,8 +1015,8 @@ void LightStorage::update_light_buffers(RenderDataRD *p_render_data, const Paged
 				if (size > 0.0 && light_data.soft_shadow_scale > 0.0) {
 					// Only enable PCSS-like soft shadows if blurring is enabled.
 					// Otherwise, performance would decrease with no visual difference.
-					float half_np = cm.get_z_near() * Math::tan(Math::deg_to_rad(spot_angle));
-					light_data.soft_shadow_size = (size * 0.5 / radius) / (half_np / cm.get_z_near()) * rect.size.width;
+					float half_np = Math::tan(Math::deg_to_rad(spot_angle));
+					light_data.soft_shadow_size = (size * 0.5) / (half_np) * rect.size.width;
 				} else {
 					light_data.soft_shadow_size = 0.0;
 					light_data.soft_shadow_scale *= RendererSceneRenderRD::get_singleton()->shadows_quality_radius_get(); // Only use quality radius for PCF

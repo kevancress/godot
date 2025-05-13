@@ -790,7 +790,7 @@ void light_process_spot(uint idx, vec3 vertex, hvec3 eye_vec, hvec3 normal, vec3
 			//soft shadow
 
 			//find blocker
-			float z_norm = dot(spot_dir, -light_rel_vec) * spot_lights.data[idx].inv_radius;
+			float z_norm = 1.0 - dot(spot_dir, -light_rel_vec);
 
 			vec2 shadow_uv = splane.xy * spot_lights.data[idx].atlas_rect.zw + spot_lights.data[idx].atlas_rect.xy;
 
