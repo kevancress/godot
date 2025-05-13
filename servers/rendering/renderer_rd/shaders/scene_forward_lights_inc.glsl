@@ -790,7 +790,7 @@ void light_process_spot(uint idx, vec3 vertex, hvec3 eye_vec, hvec3 normal, vec3
 			//soft shadow
 
 			//find blocker
-			float z_norm = 1.0 - dot(spot_dir, -light_rel_vec);
+			float z_norm = 1.0 - light_length;
 
 			vec2 shadow_uv = splane.xy * spot_lights.data[idx].atlas_rect.zw + spot_lights.data[idx].atlas_rect.xy;
 
@@ -805,7 +805,7 @@ void light_process_spot(uint idx, vec3 vertex, hvec3 eye_vec, hvec3 normal, vec3
 				disk_rotation = mat2(vec2(cr, -sr), vec2(sr, cr));
 			}
 
-			float uv_size = spot_lights.data[idx].soft_shadow_size * z_norm * spot_lights.data[idx].soft_shadow_scale;
+			float uv_size = size * z_norm * spot_lights.data[idx].soft_shadow_scale;
 			vec2 clamp_max = spot_lights.data[idx].atlas_rect.xy + spot_lights.data[idx].atlas_rect.zw;
 
 			SPEC_CONSTANT_LOOP_ANNOTATION
