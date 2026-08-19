@@ -146,6 +146,9 @@ int AudioDriver::_get_configured_mix_rate() {
 }
 
 AudioDriver::SpeakerMode AudioDriver::get_speaker_mode_by_total_channels(int p_channels) const {
+	if (GLOBAL_GET("audio/general/override_14_2_channels")){
+		return SPEAKER_CUSTOM_14_2; 
+	}
 	switch (p_channels) {
 		case 4:
 			return SPEAKER_SURROUND_31;
@@ -153,6 +156,8 @@ AudioDriver::SpeakerMode AudioDriver::get_speaker_mode_by_total_channels(int p_c
 			return SPEAKER_SURROUND_51;
 		case 8:
 			return SPEAKER_SURROUND_71;
+		case 16:
+			return SPEAKER_CUSTOM_14_2;
 	}
 
 	// Default to STEREO
@@ -169,6 +174,8 @@ int AudioDriver::get_total_channels_by_speaker_mode(AudioDriver::SpeakerMode p_m
 			return 6;
 		case SPEAKER_SURROUND_71:
 			return 8;
+		case SPEAKER_CUSTOM_14_2:
+			return 16;
 	}
 
 	ERR_FAIL_V(2);
@@ -2128,6 +2135,7 @@ void AudioServer::_bind_methods() {
 	BIND_ENUM_CONSTANT(SPEAKER_SURROUND_31);
 	BIND_ENUM_CONSTANT(SPEAKER_SURROUND_51);
 	BIND_ENUM_CONSTANT(SPEAKER_SURROUND_71);
+	BIND_ENUM_CONSTANT(SPEAKER_CUSTOM_14_2);
 
 	BIND_ENUM_CONSTANT(PLAYBACK_TYPE_DEFAULT);
 	BIND_ENUM_CONSTANT(PLAYBACK_TYPE_STREAM);

@@ -110,6 +110,9 @@ Error MovieWriterPNGWAV::write_begin(const Size2i &p_movie_size, uint32_t p_fps,
 		case AudioServer::SPEAKER_SURROUND_71:
 			channels = 8;
 			break;
+		case AudioServer::SPEAKER_CUSTOM_14_2:
+			channels = 16;
+			break;
 	}
 
 	f_wav->store_32(16); //standard format, no extra fields

@@ -1754,7 +1754,7 @@ ProjectSettings::ProjectSettings() {
 	GLOBAL_DEF_RST("audio/general/text_to_speech", false);
 	GLOBAL_DEF_RST(PropertyInfo(Variant::FLOAT, "audio/general/2d_panning_strength", PROPERTY_HINT_RANGE, "0,2,0.01"), 0.5f);
 	GLOBAL_DEF_RST(PropertyInfo(Variant::FLOAT, "audio/general/3d_panning_strength", PROPERTY_HINT_RANGE, "0,2,0.01"), 0.5f);
-
+	GLOBAL_DEF(PropertyInfo(Variant::BOOL, "audio/general/override_14_2_channels"), false);
 	GLOBAL_DEF(PropertyInfo(Variant::VECTOR3, "audio/general/speaker_1_position"), Vector3(-1.0, 0.0, -1.0));
 	GLOBAL_DEF(PropertyInfo(Variant::VECTOR3, "audio/general/speaker_2_position"), Vector3(1.0, 0.0, -1.0));
 	GLOBAL_DEF(PropertyInfo(Variant::VECTOR3, "audio/general/speaker_3_position"), Vector3(0.0, 0.0, -1.0));

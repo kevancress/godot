@@ -418,6 +418,9 @@
 		<constant name="SPEAKER_SURROUND_71" value="3" enum="SpeakerMode">
 			A 7.1 channel surround setup was detected.
 		</constant>
+		<constant name="SPEAKER_CUSTOM_14_2" value="4" enum="SpeakerMode">
+			A 14.2 channel surround setup was detected.
+		</constant>
 		<constant name="PLAYBACK_TYPE_DEFAULT" value="0" enum="PlaybackType" experimental="">
 			The playback will be considered of the type declared at [member ProjectSettings.audio/general/default_playback_type].
 		</constant>
