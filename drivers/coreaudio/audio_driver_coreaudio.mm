@@ -116,10 +116,6 @@ Error AudioDriverCoreAudio::init() {
 		case 8: // Surround 7.1
 			channels = strdesc.mChannelsPerFrame;
 			break;
-		
-		case 16:
-			channels = 16;
-			break;
 
 		default:
 			// Unknown number of channels, default to stereo

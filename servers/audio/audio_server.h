@@ -84,7 +84,6 @@ public:
 		SPEAKER_SURROUND_31,
 		SPEAKER_SURROUND_51,
 		SPEAKER_SURROUND_71,
-		SPEAKER_CUSTOM_14_2,
 	};
 
 	static AudioDriver *get_singleton();
@@ -188,7 +187,6 @@ public:
 		SPEAKER_SURROUND_31,
 		SPEAKER_SURROUND_51,
 		SPEAKER_SURROUND_71,
-		SPEAKER_CUSTOM_14_2,
 	};
 
 	enum PlaybackType {
@@ -200,7 +198,7 @@ public:
 
 	enum {
 		AUDIO_DATA_INVALID_ID = -1,
-		MAX_CHANNELS_PER_BUS = 8,
+		MAX_CHANNELS_PER_BUS = 4,
 		MAX_BUSES_PER_PLAYBACK = 6,
 		LOOKAHEAD_BUFFER_SIZE = 64,
 	};
@@ -365,8 +363,6 @@ public:
 				return 3;
 			case SPEAKER_SURROUND_71:
 				return 4;
-			case SPEAKER_CUSTOM_14_2:
-				return 8;
 		}
 		ERR_FAIL_V(1);
 	}

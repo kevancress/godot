@@ -114,20 +114,9 @@ void AudioStreamPlayer3D::_calc_output_vol(const Vector3 &source_dir, real_t tig
 		case AudioServer::SPEAKER_SURROUND_71:
 			speaker_count = 8;
 			break;
-		case AudioServer::SPEAKER_CUSTOM_14_2:
-			speaker_count = 16;
-			break;
 	}
 
-	Vector3 speaker_directions[16] = {
-		GLOBAL_GET("audio/general/speaker_1_position"), // front-left
-		GLOBAL_GET("audio/general/speaker_2_position"), // front-right
-		GLOBAL_GET("audio/general/speaker_3_position"), // center
-		GLOBAL_GET("audio/general/speaker_4_position"), // rear-left
-		GLOBAL_GET("audio/general/speaker_5_position"), // rear-right
-		GLOBAL_GET("audio/general/speaker_6_position"), // side-left
-		GLOBAL_GET("audio/general/speaker_7_position"), // side-right
-		GLOBAL_GET("audio/general/speaker_8_position"), //LFE
+	Vector3 speaker_directions[8] = {
 		GLOBAL_GET("audio/general/speaker_1_position"), // front-left
 		GLOBAL_GET("audio/general/speaker_2_position"), // front-right
 		GLOBAL_GET("audio/general/speaker_3_position"), // center
@@ -139,21 +128,10 @@ void AudioStreamPlayer3D::_calc_output_vol(const Vector3 &source_dir, real_t tig
 	};
 
 	Spcap spcap(speaker_count, speaker_directions); //TODO: should only be created/recreated once the speaker mode / speaker positions changes
-	real_t volumes[16];
+	real_t volumes[8];
 	spcap.calculate(source_dir, tightness, speaker_count, volumes);
 
 	switch (AudioServer::get_singleton()->get_speaker_mode()) {
-		case AudioServer::SPEAKER_CUSTOM_14_2:
-			output.write[4].left = volumes[8]; 
-			output.write[4].right = volumes[9];
-			output.write[5].left = volumes[10]; 
-			output.write[5].right = volumes[11];
-			output.write[6].left = volumes[12]; 
-			output.write[6].right = volumes[13];
-			output.write[7].left = volumes[14]; 
-			output.write[7].right = volumes[15];
-			[[fallthrough]];
-
 		case AudioServer::SPEAKER_SURROUND_71:
 			output.write[3].left = volumes[5]; // side-left
 			output.write[3].right = volumes[6]; // side-right
@@ -451,20 +429,9 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 			case AudioServer::SPEAKER_SURROUND_71:
 				speaker_count = 8;
 				break;
-			case AudioServer::SPEAKER_CUSTOM_14_2:
-				speaker_count = 16;
-				break;
 		}
 
-		Vector3 speaker_positions[16] = {
-			GLOBAL_GET("audio/general/speaker_1_position"), // front-left
-			GLOBAL_GET("audio/general/speaker_2_position"), // front-right
-			GLOBAL_GET("audio/general/speaker_3_position"), // center
-			GLOBAL_GET("audio/general/speaker_4_position"), // rear-left
-			GLOBAL_GET("audio/general/speaker_5_position"), // rear-right
-			GLOBAL_GET("audio/general/speaker_6_position"), // side-left
-			GLOBAL_GET("audio/general/speaker_7_position"), // side-right
-			GLOBAL_GET("audio/general/speaker_8_position"), //LFE
+		Vector3 speaker_positions[8] = {
 			GLOBAL_GET("audio/general/speaker_1_position"), // front-left
 			GLOBAL_GET("audio/general/speaker_2_position"), // front-right
 			GLOBAL_GET("audio/general/speaker_3_position"), // center
@@ -475,7 +442,7 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 			GLOBAL_GET("audio/general/speaker_8_position"), //LFE
 		};
 
-		real_t multipliers[16];
+		real_t multipliers[8];
 		Vector3 area_sound_pos;
 		Vector3 listener_area_pos;
 		Vector3 local_pos;
@@ -531,17 +498,6 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 		}
 
 		switch (AudioServer::get_singleton()->get_speaker_mode()) {
-			case AudioServer::SPEAKER_CUSTOM_14_2:
-				output_volume_vector.write[4].l *= multipliers[8]; // side-left
-				output_volume_vector.write[4].r *= multipliers[9]; // side-right
-				output_volume_vector.write[5].l *= multipliers[10]; // side-left
-				output_volume_vector.write[5].r *= multipliers[11]; // side-right
-				output_volume_vector.write[6].l *= multipliers[12]; // side-left
-				output_volume_vector.write[6].r *= multipliers[13]; // side-right
-				output_volume_vector.write[7].l *= multipliers[14]; // side-left
-				output_volume_vector.write[7].r *= multipliers[15]; // side-right
-				[[fallthrough]];
-			
 			case AudioServer::SPEAKER_SURROUND_71:
 				output_volume_vector.write[3].l *= multipliers[5]; // side-left
 				output_volume_vector.write[3].r *= multipliers[6]; // side-right

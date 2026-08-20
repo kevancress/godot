@@ -135,10 +135,6 @@ Error MovieWriterOGV::write_begin(const Size2i &p_movie_size, uint32_t p_fps, co
 		case AudioServer::SPEAKER_SURROUND_71:
 			audio_ch = 8;
 			break;
-		case AudioServer::SPEAKER_CUSTOM_14_2:
-			audio_ch = 16;
-			break;
-		
 	}
 	audio_frames = mix_rate / fps;
 
